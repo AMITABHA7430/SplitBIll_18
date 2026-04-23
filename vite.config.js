@@ -10,6 +10,8 @@ export default defineConfig({
     strictPort: true,
     // Allow the emergentagent preview domain + localhost
     allowedHosts: true,
+    // Ignore the pod's stub "frontend" folder (supervisor chdir target).
+    watch: { ignored: ['**/frontend/**', '**/memory/**', '**/test_reports/**'] },
     hmr: {
       clientPort: 443,
       protocol: 'wss'
