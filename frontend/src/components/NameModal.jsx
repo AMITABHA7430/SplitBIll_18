@@ -64,6 +64,7 @@ export default function NameModal({ onSubmit }) {
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onBlur={() => setTouched(true)}
           placeholder="e.g. Aarav"
           maxLength={24}
           className="input"
@@ -77,8 +78,8 @@ export default function NameModal({ onSubmit }) {
         <button
           type="submit"
           data-testid="name-modal-submit"
-          disabled={!valid}
-          className="btn-primary mt-6 w-full"
+          aria-disabled={!valid}
+          className={`btn-primary mt-6 w-full ${!valid ? 'opacity-55' : ''}`}
         >
           Enter SplitDash
           <ArrowRight className="h-4 w-4" />

@@ -28,9 +28,13 @@ export default function useBroadcast(channelName, onMessage) {
     if (typeof BroadcastChannel !== 'undefined') {
       bc = new BroadcastChannel(channelName)
       bc.onmessage = (ev) => handlerRef.current?.(ev.data)
+      let closed = false
       chanRef.current = {
-        post: (data) => bc.postMessage(data),
-        close: () => bc.close()
+        post: (data) => {
+          if (closed) return
+          try { bc.postMessage(data) } catch { /* channel may have been closed */ }
+        },
+        close: () => { closed = true; try { bc.close() } catch {} }
       }
     } else {
       // Fallback using localStorage `storage` events.
@@ -56,7 +60,9 @@ export default function useBroadcast(channelName, onMessage) {
     }
 
     return () => {
-      if (bc) bc.close()
+      if (bc) {
+        try { bc.close() } catch {}
+      }
       if (storageListener) window.removeEventListener('storage', storageListener)
     }
   }, [channelName])

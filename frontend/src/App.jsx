@@ -80,6 +80,7 @@ export default function App() {
   const [tipPct, setTipPct] = useState(initial?.tipPct ?? 10)
 
   // Peer tracking & network status (UX flair).
+  const peersRef = useRef(new Set())
   const [peers, setPeers] = useState(1) // includes this tab
   const [online, setOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const [justClaimedIds, setJustClaimedIds] = useState({})
@@ -103,13 +104,26 @@ export default function App() {
 
     switch (msg.type) {
       case 'HELLO': {
-        // A new tab announced itself. Reply with our full state so they sync.
+        // A new tab announced itself. Reply with our full state + presence so
+        // they can count us.
         post({
           type: 'INIT_SYNC',
           from: SESSION_ID,
           state: stateRef.current
         })
-        setPeers((p) => p + 1)
+        post({ type: 'PRESENCE', from: SESSION_ID })
+        peersRef.current.add(msg.from)
+        setPeers(peersRef.current.size + 1)
+        break
+      }
+      case 'PRESENCE': {
+        peersRef.current.add(msg.from)
+        setPeers(peersRef.current.size + 1)
+        break
+      }
+      case 'BYE': {
+        peersRef.current.delete(msg.from)
+        setPeers(peersRef.current.size + 1)
         break
       }
       case 'INIT_SYNC': {
@@ -186,11 +200,20 @@ export default function App() {
   const post = useBroadcast(CHANNEL, onMessage)
 
   // On mount: say hello to any existing peers so they share their state.
+  // On unload: broadcast BYE so peers decrement their counter.
   useEffect(() => {
     const t = setTimeout(() => {
       post({ type: 'HELLO', from: SESSION_ID })
     }, 120)
-    return () => clearTimeout(t)
+    const sayBye = () => post({ type: 'BYE', from: SESSION_ID })
+    window.addEventListener('pagehide', sayBye)
+    window.addEventListener('beforeunload', sayBye)
+    return () => {
+      clearTimeout(t)
+      sayBye()
+      window.removeEventListener('pagehide', sayBye)
+      window.removeEventListener('beforeunload', sayBye)
+    }
   }, [post])
 
   // Online / offline indicator
