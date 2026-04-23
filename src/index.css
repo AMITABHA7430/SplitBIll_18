@@ -129,3 +129,66 @@ body::before {
   100% { box-shadow: 0 0 0 22px rgba(52, 240, 177, 0); }
 }
 .claim-pulse { animation: claimPulse 700ms ease-out 1; }
+
+/* =========================
+   📱 MOBILE OPTIMIZATION
+   ========================= */
+
+button, .btn-primary, .btn-ghost {
+  touch-action: manipulation;
+}
+
+@media (max-width: 640px) {
+  .glass {
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+  }
+
+  .glass-strong {
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  body {
+    font-size: 14px;
+  }
+
+  body::before {
+    opacity: 0.015;
+  }
+}
+
+input, textarea {
+  font-size: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-primary {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-ghost {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .input {
+    padding: 0.65rem 0.9rem;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
